@@ -186,6 +186,24 @@
 				</configuration>
 			</plugin>
 		</plugins>
+
+		<resources>
+			<!--需要设置打包的文件 特别是非java文件-->
+			<resource>
+				<directory>src/main/java</directory>
+				<includes>
+					<include>**/*.xml</include>
+				</includes>
+				<filtering>true</filtering>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<includes>
+					<include>**/*.xml</include>
+					<include>**/*.properties</include>
+				</includes>
+			</resource>
+		</resources>
 	</build>
 
 </project>

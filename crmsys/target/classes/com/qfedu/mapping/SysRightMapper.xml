@@ -160,4 +160,28 @@
 	on s.right_parent_code = r.right_code
 
 </select>
+
+    <select id="seachByCondition" parameterType="map" resultType="com.qfedu.vo.VRight">
+    SELECT
+	s.right_code,s.right_name,r.right_name rName,s.right_flag FROM
+	sys_right s
+	left JOIN sys_right r
+	on s.right_parent_code = r.right_code
+    <where>
+        <if test="rightName != null">
+            and s.right_name LIKE CONCAT('%',#{rightName},'%')
+        </if>
+        <if test="rightParentCode != 0">
+            AND s.right_parent_code = #{rightParentCode}
+        </if>
+    </where>
+    </select>
+
+    <select id="findAllParentNode" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"></include>
+         FROM sys_right WHERE
+	    right_parent_code is NULL
+
+    </select>
 </mapper>

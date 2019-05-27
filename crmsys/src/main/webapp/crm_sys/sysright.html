@@ -20,9 +20,22 @@
     <hr class="hr1" />
   </div>
   <div class="operation_button">
-  	<a href="#" title="新建" onclick="to('sysroleadd.html')">新建</a>
+    <a href="#" title="查询" onclick="searchByCon(1)">查询</a>
   </div>
-  
+
+  <div class="search_input">
+    <ul class="txt">
+      <li>权限名
+        <input type="text" size="100" name="rightName" style="width: 200px; height: 20px"/>
+      </li>
+      <li>所属权限：
+        <select name="rightParentCode"   id="sid" style="width: 214px;height: 30px">
+          <option value="0">--请选择--</option>
+        </select>
+      </li>
+    </ul>
+  </div>
+
   <div>
     <table width="100%" border="0" cellpadding="0" cellspacing="0" class="table_list" >
       <thead>
@@ -57,9 +70,51 @@
 <script type="text/javascript">
 	$(function(){
 		loadData(1);
+
+		$.ajax({
+          type:"get",
+          url:"/crmsys/right/allNode.do",
+          dataType:"json",
+          success:function(data){
+            if (data.code == 1){
+              var infos = data.info;
+              $(infos).each(function(){
+                var html = ' <option value="'+this.rightCode+'">'+this.rightName+'</option>';
+                $("#sid").append($(html));
+              })
+            } else{
+              alert(data.info);
+            }
+          }
+        })
 	})
 </script>	
 <script type="text/javascript">
+
+    function  bind(infos) {
+      $("tbody").empty();
+      $(infos).each(function(){
+        var html = '<tr>';
+        html+='<td>'+this.rightCode+'</td>';
+        if(this.rightName == null){
+          html+='<td>一级描述</td>';
+        }else{
+          html+='<td>'+this.rightName+'</td>';
+        }
+
+        html+='<td>'+this.rName+'</td>';
+        if(this.rightFlag == 1){
+          html+='<td>正常</td>';
+        }else{
+          html+='<td>已删除</td>';
+        }
+        html+='<td><img title="编辑" src="../images/hammer_screwdriver.png" class="op_button"' +
+                '  onclick="update('+this.rightCode+')" /> <img title="删除" src="../images/cross.png"' +
+                ' class="op_button close" onclick="delRight('+this.rightCode+')" /></td>';
+        html+='</tr>';
+        $("tbody").append($(html));
+      })
+    }
 
 	function loadData(page){
 		$.ajax({
@@ -69,35 +124,12 @@
 			success:function(data){
 				if(data.code == 1){
 					var infos = data.info.row;
-					$("tbody").empty();
-					$(infos).each(function(){
-						var html = '<tr>';
-			      		html+='<td>'+this.rightCode+'</td>';
-			      		if(this.rightName == null){
-			      			html+='<td></td>';
-			      		}else{
-			      			html+='<td>'+this.rightName+'</td>';
-			      		}
-			      		
-			      		html+='<td>'+this.rName+'</td>';
-			      		if(this.rightFlag == 1){
-			      			html+='<td>正常</td>';
-			      		}else{
-			      			html+='<td>已删除</td>';
-			      		}
-			      		html+='<td><img title="编辑" src="../images/hammer_screwdriver.png" class="op_button"  onclick="updateRole('+this.roleId+')" /> <img title="删除" src="../images/cross.png" class="op_button close" onclick="deleteRole('+this.roleId+')" /></td>';
-			      		html+='</tr>';
-			      		$("tbody").append($(html));
-					})
-					
+					bind(infos);
 					var total = data.info.total;
 					var totalPage = Math.ceil(total / 5);
-					
 					$(".total").empty();
 					var html1='<span>'+totalPage+'</span>';
 					$(".total").append($(html1));
-					
-					
 					$(".count").empty();
 					var html2='<span>'+total+'</span>';
 					$(".count").append($(html2))
@@ -127,6 +159,78 @@
 		})
 	}
 	
+	function  delRight(rightCode) {
+	  var rt = window.confirm("确定删除该权限");
+	  if (rt ){
+        $.ajax({
+          type: "get",
+          url:"/crmsys/right/delRight.do?rightCode="+rightCode,
+          dataType:"json",
+          success:function(data){
+            if(data.code == 1){
+              alert("删除成功");
+              loadData(1);
+              window.parent.lefthtml.location.reload();
+            }else
+              alert(data.info);
+          }
+        })
+      }
+    }
 </script>
+
+<script type="text/javascript">
+    function  searchByCon(page) {
+      $.ajax({
+        type:"get",
+        url:"/crmsys/right/findByCon.do?page="+page,
+        data:{
+          rightName:$("input[name=rightName]").val(),
+          rightParentCode:$("#sid").val()
+        },
+        dataType:"json",
+        success:function(data){
+          if (data.code == 1){
+            var  infos = data.info.rows;
+            bind(infos);
+            var total = data.info.total;
+            var totalPage = Math.ceil(total / 5);
+            $(".total").empty();
+            var html1='<span>'+totalPage+'</span>';
+            $(".total").append($(html1));
+            $(".count").empty();
+            var html2='<span>'+total+'</span>';
+            $(".count").append($(html2))
+
+            var pno = $('.now').text();
+            //分页设置
+            $('.M-box').pagination({
+              pageCount: totalPage,  // 总页数
+              current:pno,//当前第几页
+              jump: true,  // 是否显示跳转相关元素
+              jumpBtn: 'go', // 跳转按钮显示文字
+              coping: true,    //是否显示首页末页
+              homePage: '首页',
+              endPage: '末页',
+              prevContent: '<<',  // 上一页功能 显示文字信息
+              nextContent: '>>',
+              callback:function(index){
+                //	index.getCurrent() 获取当前要是用的页码
+                $('.now').text(index.getCurrent());
+                searchByCon(index.getCurrent());//获取当前页
+              }
+            });
+          }else{
+            alert(data.info);
+          }
+        }
+      })
+    }
+
+    function update(rightCode) {
+      window.location.href="sysrightupdate.html?rightCode="+rightCode;
+    }
+</script>
+
 </body>
 </html>
