@@ -1,0 +1,132 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>权限管理</title>
+<link href="../css/stylesheet.css" rel="stylesheet" type="text/css" />
+<link href="../css/style.css" rel="stylesheet" type="text/css" />
+<link href="../pagination/pagination.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../js/jquery.js"></script>
+<script type="text/javascript" src="../js/simpla.jquery.configuration.js"></script>
+<script type="text/javascript" src="../js/javascript.js"></script>
+<script type="text/javascript" src="../datepicker/WdatePicker.js"> </script>
+<script type="text/javascript" src="../pagination/jquery.pagination.js"> </script>
+<script type="text/javascript" src="../js/vue.min.js"></script>
+</head>
+
+<body>
+<div style="padding:5px;">
+  <div class="txt" style="padding-top:3px;" >当前位置：系统管理&nbsp;&gt;&nbsp;权限管理
+    <hr class="hr1" />
+  </div>
+  <div class="operation_button">
+  	<a href="#" title="新建" onclick="to('sysroleadd.html')">新建</a>
+  </div>
+  
+  <div>
+    <table width="100%" border="0" cellpadding="0" cellspacing="0" class="table_list" >
+      <thead>
+        <tr>
+          <th width="15%">编号</th>
+          <th width="20%">权限名称</th>
+          <th width="30%">所属类型</th>
+          <th width="15%">是否删除状态</th>
+          <th width="15%">操作</th>
+        </tr>
+      </thead>
+      <tbody>
+      	<!-- <tr>
+      		<td></td>
+      		<td></td>
+      		<td></td>
+      		<td></td>
+      		<td><img title="编辑" src="../images/hammer_screwdriver.png" class="op_button"  onclick="updateRole('+this.roleId+')" /> <img title="删除" src="../images/cross.png" class="op_button close" onclick="deleteRole('+this.roleId+')" /></td>
+      	</tr> -->
+      </tbody>
+    </table>
+  </div>
+  
+  <div class="wrapper">
+  	<div class="eg"></div>
+	<div class="M-box"></div>
+	<div class="tips">当前是第<span class="now">1</span>页,总共<span class="total"></span>页,总共<span class="count"></span>条数据</div></div>
+  </div>
+
+
+
+<script type="text/javascript">
+	$(function(){
+		loadData(1);
+	})
+</script>	
+<script type="text/javascript">
+
+	function loadData(page){
+		$.ajax({
+			type:"get",
+			url:"/crmsys/right/rightList.do?page="+page,
+			dataType:"json",
+			success:function(data){
+				if(data.code == 1){
+					var infos = data.info.row;
+					$("tbody").empty();
+					$(infos).each(function(){
+						var html = '<tr>';
+			      		html+='<td>'+this.rightCode+'</td>';
+			      		if(this.rightName == null){
+			      			html+='<td></td>';
+			      		}else{
+			      			html+='<td>'+this.rightName+'</td>';
+			      		}
+			      		
+			      		html+='<td>'+this.rName+'</td>';
+			      		if(this.rightFlag == 1){
+			      			html+='<td>正常</td>';
+			      		}else{
+			      			html+='<td>已删除</td>';
+			      		}
+			      		html+='<td><img title="编辑" src="../images/hammer_screwdriver.png" class="op_button"  onclick="updateRole('+this.roleId+')" /> <img title="删除" src="../images/cross.png" class="op_button close" onclick="deleteRole('+this.roleId+')" /></td>';
+			      		html+='</tr>';
+			      		$("tbody").append($(html));
+					})
+					
+					var total = data.info.total;
+					var totalPage = Math.ceil(total / 5);
+					
+					$(".total").empty();
+					var html1='<span>'+totalPage+'</span>';
+					$(".total").append($(html1));
+					
+					
+					$(".count").empty();
+					var html2='<span>'+total+'</span>';
+					$(".count").append($(html2))
+					
+					var pno = $('.now').text();
+					//分页设置
+	                $('.M-box').pagination({  
+	                    pageCount: totalPage,  // 总页数
+	                    current:pno,//当前第几页  
+	                    jump: true,  // 是否显示跳转相关元素
+	                    jumpBtn: 'go', // 跳转按钮显示文字
+	                    coping: true,    //是否显示首页末页
+	                    homePage: '首页',  
+	                    endPage: '末页',  
+	                    prevContent: '<<',  // 上一页功能 显示文字信息
+	                    nextContent: '>>',  
+	                    callback:function(index){  
+	                    	//	index.getCurrent() 获取当前要是用的页码
+	                       $('.now').text(index.getCurrent());   
+	                        loadData(index.getCurrent());//获取当前页  
+	                   } 
+	                }); 
+				}else {
+					alert(data.info);
+				}
+			}
+		})
+	}
+	
+</script>
+</body>
+</html>

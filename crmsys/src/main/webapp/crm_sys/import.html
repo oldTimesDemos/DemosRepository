@@ -1,0 +1,84 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>导入界面</title>
+<link href="../css/stylesheet.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../js/javascript.js"></script>
+<script type="text/javascript" src="../js/jquery.js"></script>
+<script type="text/javascript" src="../js/jquery.form.min.js"></script>
+<style>
+body {
+	margin: 0;
+	padding: 0
+}
+
+.role {
+	margin: 0px 30px 0px 0px;
+	float: left;
+}
+
+.right {
+	display: none;
+}
+
+.overflow {
+	padding-left: 30px;
+	display: block;
+}
+</style>
+<script type="text/javascript">
+	function rightChange(id){
+			var div = document.getElementById(id);
+			div.className = "overflow";
+		}
+</script>
+</head>
+
+<body style="width: 1366px">
+	<div style="padding: 5px;">
+		<div class="txt" style="padding-top: 3px;">
+			当前位置：客户开发计划&nbsp;&gt;&nbsp;客户信息管理&nbsp;&gt;&nbsp;<a href="list.html">客户信息</a>&nbsp;&gt;&nbsp;编辑客户信息
+			<hr class="hr1" />
+		</div>
+		<div class="operation_button">
+			<a href="#" title="返回" onclick="back()">返回</a>
+		</div>
+		<div class="operation_button">
+			<a href="#" title="导入" onclick="importExcel()">导入</a>
+		</div>
+		<div class="out_bg">
+			<div class="in_bg" style="height: 470px;">
+				<div style="margin: 100px 0px 0px 300px">
+					<form method="post" action="" enctype="multipart/form-data">
+						<table border="0" cellpadding="0" cellspacing="0"
+							class="table_input txt">
+							<tr>
+								<td width="126">选择导入的EXCEL</td>
+								<td width="126"><input type="file" name="excelFile" /></td>
+							</tr>
+						</table>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+		function importExcel() {
+			$("form").ajaxSubmit({
+				type : "post",
+				url : "/crmsys/user/import.do",
+				data : $("form").serialize(),
+				success : function(data) {
+					if (data.code == 1) {
+						alert("导入成功");
+					} else {
+						alert(data.info);
+					}
+				}
+			})
+
+		}
+	</script>
+</body>
+</html>

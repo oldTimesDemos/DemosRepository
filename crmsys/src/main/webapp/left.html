@@ -1,0 +1,129 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>CRM_Left</title>
+<link rel="stylesheet" href="css/stylesheet.css" type="text/css" />
+<link rel="stylesheet" href="css/sidebar.css" type="text/css" />
+<script type="text/javascript" src="js/javascript.js"></script>
+<script type="text/javascript" src="js/jquery.js"></script>
+<script type="text/javascript" src="js/simpla.jquery.configuration.js"></script>
+</head>
+<body>
+	<div>
+		<div id="loader">
+			<img src="images/1d_2.gif" />
+		</div>
+		<div class="current_user attention" id="tid"></div>
+		<div id="sidebar">
+			<div id="sidebar-wrapper">
+				<ul id="main-nav">
+
+				</ul>
+			</div>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+	$(function(){
+		$.ajax({
+			type:"get",
+			url:"menu.do",
+			dataType:"json",
+			success:function(data){
+				if(data.code == 1){
+					var info = data.info;
+					var cindex=1;
+					$(info).each(function(index,item){
+						var html = '<li> <a href="#" class="nav-top-item" id="man_nav_'+(index + 1)+'" onclick="list_sub_nav(id)"> '+item.menuName+' </a>';
+				        html +='<ul>';
+				       var cmenus = item.menulist;
+				       $(cmenus).each(function(){
+				    	   
+				    	   html +='<li><a href="'+this.menuUrl+'" target="rightFrame" id="a_nav_'+cindex+'" onclick="a_sub_nav(id)">'+this.menuName+'</a></li>'; 
+				       		cindex++;
+				       })
+				        
+				        html +='</ul>';
+				        html +='</li>';
+				        $("#main-nav").append($(html));
+					})
+				
+				//Sidebar Accordion Menu:
+				
+				$("#main-nav li ul").hide(); // Hide all sub menus
+				$("#main-nav li a.current").parent().find("ul").slideToggle("slow"); // Slide down the current menu item's sub menu
+				
+				$("#main-nav li a.nav-top-item").click( // When a top menu item is clicked...
+					function () {
+						$(this).parent().siblings().find("ul").slideUp("normal"); // Slide up all sub menus except the one clicked
+						$(this).next().slideToggle("normal"); // Slide down the clicked sub menu
+						return false;
+					}
+				);
+				
+				$("#main-nav li a.no-submenu").click( // When a menu item with no sub menu is clicked...
+					function () {
+						window.location.href=(this.href); // Just open the link instead of a sub menu
+						return false;
+					}
+				); 
+
+		    // Sidebar Accordion Menu Hover Effect:
+				
+				$("#main-nav li .nav-top-item").hover(
+					function () {
+						$(this).stop().animate({ paddingRight: "25px" }, 200);
+					}, 
+					function () {
+						$(this).stop().animate({ paddingRight: "15px" });
+					}
+				);
+			}else{
+				alert(data.info);
+				window.parent.location.href="login.html";
+			}
+			}
+		})
+		
+		getUser();
+	})
+</script>
+
+	<script type="text/javascript">
+	function getUser(){
+		$.ajax({
+			type:"get",
+			url:"getUserInfo.do",
+			dataType:"json",
+			success:function(data){
+				if(data.code == 1){
+					var infos = data.info;
+					var html = '<div> 欢迎您，<strong>'+infos.usrName+'</strong><br />';
+				     html+=' ['+infos.roleName+'，<a href="javascript:logout()">退出</a>] </div>';
+				     $("#tid").append($(html))
+				}
+				
+			}
+		})
+	}
+	
+	function logout() {
+		var rs = window.confirm("是否确定退出？");
+		if(rs){
+			$.ajax({
+				type:"get",
+				url:"logout.do",
+				dataType:"json",
+				success:function(data){
+					if(data.code == 1){ 
+						window.parent.location.href="login.html";
+					}
+				}
+			})
+		}
+		
+	}
+</script>
+</body>
+</html>

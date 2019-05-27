@@ -1,0 +1,53 @@
+package com.qfedu.controller;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.qfedu.common.CommonInfo;
+import com.qfedu.entity.SysUser;
+import com.qfedu.service.SysRightService;
+import com.qfedu.vo.JsonBean;
+import com.qfedu.vo.VRight;
+import com.qfedu.vo.VTreeInfo;
+
+@Controller
+@ResponseBody
+public class RightController {
+
+	@Autowired
+	private SysRightService rightService;
+	
+	@RequestMapping("/right/tree.do")
+	public JsonBean findTreeNodes(int roleId) {
+		List<VTreeInfo> list = rightService.findTreeNode(roleId);
+		
+		return new JsonBean(1, list);
+	}
+	
+	@RequestMapping("/right/update.do")
+	public JsonBean updateRights(Integer roleId, Integer[] rightCodes,HttpSession session) {
+		//	执行修改
+		rightService.changeRightInfo(roleId, rightCodes);
+		
+		SysUser user = (SysUser) session.getAttribute(CommonInfo.LOGIN_USER);
+		
+		if (roleId == user.getUsrRoleId()) {
+			return new JsonBean(2, null);
+		}else {
+			return new JsonBean(1, null);
+		}
+	}
+	
+	@RequestMapping("/right/rightList.do")
+	public JsonBean findAllRights(int page) {
+		Map<String, Object> map = rightService.findAllRights(page);
+		return new JsonBean(1, map);
+	}
+}

@@ -1,0 +1,38 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
+<head>
+<meta charset="UTF-8">
+<title>登录页面</title>
+<script type="text/javascript" src="js/jquery.js"></script>
+</head>
+<body>
+<h1>系统登录</h1>
+	<form action="" method="post" onsubmit="return false;">
+		<input type="text" name="name" placeholder="请输入用户名"><br>
+		<input type="password" name="password" placeholder="请输入密码"><br>
+		<input type="submit" value="登录"> 
+	</form>
+
+</body>
+
+<script type="text/javascript">
+	$("form").submit(function(){
+		$.ajax({
+			type:"post",
+			url:"login.do",
+			data:$("form").serialize(),
+			dataType:"json",
+			success:function(data){
+				if (data.code == 1){
+					alert("登录成功");
+					window.location.href="index.html";
+				}else{
+					alert(data.info);
+				}
+			}
+		})
+	})
+
+</script>
+</html>

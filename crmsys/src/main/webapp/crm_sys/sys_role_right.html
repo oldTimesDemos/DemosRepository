@@ -1,0 +1,163 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>营销管理</title>
+<link href="../css/stylesheet.css" rel="stylesheet" type="text/css" />
+<link href="../css/style.css" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" type="text/css"
+	href="../ztree/css/zTreeStyle/zTreeStyle.css" />
+<script type="text/javascript" src="../js/javascript.js"></script>
+<script type="text/javascript" src="../js/jquery.js"></script>
+<script type="text/javascript" src="../ztree/js/jquery.ztree.all.min.js"></script>
+</head>
+
+<body>
+	<div style="padding: 5px;">
+		<div class="txt" style="padding-top: 3px;">
+			当前位置：系统设置&nbsp;&gt;&nbsp;角色权限管理
+			<hr class="hr1" />
+		</div>
+		<div class="operation_button">
+			<a href="#" title="保存" onclick="changeRight()">更改权限</a>
+			 <a href="#" title="返回" onclick="back()">返回</a>
+		</div>
+		<div class="out_bg">
+			<div class="in_bg">
+				<table border="0" cellpadding="0" cellspacing="0"
+					class="table_input txt">
+					<tr>
+						<td width="50">角色</td>
+						<td width="853"><select id="roleId"
+							onchange="selectInfo(this.value)">
+								<option>--请选择--</option>
+								<!--  <option value="">BOSS</option>
+                <option>客户信息管理员</option>
+                <option>销售主管</option>
+                <option>客户经理</option>
+                <option>普通工作人员</option> -->
+						</select></td>
+					</tr>
+					<tr>
+						<td width="30" valign="top">所属权限:</td>
+						<td width="350">
+
+							<div style="height: 500px; width: 200px">
+								<ul id="regionZTree" class="ztree"></ul>
+							</div>
+						</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		$(function() {
+			$.ajax({
+					type : "get",
+						url : "/crmsys/role/list.do",
+						dataType : "json",
+						success : function(data) {
+							if (data.code == 1) {
+								var infos = data.info;
+								$(infos).each(
+									function() {
+										var html = '<option value="'+this.roleId+'">'+ this.roleName+ '</option>';
+										$("#roleId").append($(html));
+									})
+							}
+						}
+					})
+				}	
+			)
+	</script>
+	<script type="text/javascript">
+		function selectInfo(roleId) {
+			var setting = {
+					/* view: {
+					    dblClickExpand: false,//双击节点时，是否自动展开父节点的标识
+					    showLine: true,//是否显示节点之间的连线
+					    fontCss:{'color':'black','font-weight':'bold'},//字体样式函数
+					    selectedMulti: true //设置是否允许同时选中多个节点
+					}, */
+					check : {
+						chkboxType : {
+							"Y" : "ps",
+							"N" : "ps"
+						},
+						chkStyle : "checkbox",//复选框类型
+						enable : true
+					//每个节点上是否显示 CheckBox
+					},
+					data : {
+						simpleData : {//简单数据模式
+							enable : true,
+							idKey : "rightCode",
+							pIdKey : "rightParentCode",
+						//rootPId: -1,
+
+						},
+						key : {
+							name : "rightName"
+						}
+					//zTree 节点数据保存节点名称的属性名称 默认值："name"
+					},
+					callback : {
+						//onCheck:onCheck
+					}
+				};
+			
+			$.ajax({
+				type : "get",
+				url : "/crmsys/right/tree.do?roleId=" + roleId,
+				dataType : "json",
+				success : function(data) {
+					zTreeObj = $.fn.zTree.init($("#regionZTree"), setting,
+							data.info);
+					zTreeObj.expandAll(true);
+					//count();
+				}
+			})
+		}
+		
+		function changeRight(){
+			var roleId = $("select").val();
+			var zTree = $.fn.zTree.getZTreeObj("regionZTree");
+			var nodes = zTree.getCheckedNodes(true);
+			
+			var checkNodeArr = [];
+			
+			for(var i = 0; i < nodes.length; i++){
+				checkNodeArr.push(nodes[i].rightCode);
+			}
+			
+			$.ajax({
+				type:"post",
+				url:"/crmsys/right/update.do",
+				data:{
+					"roleId":roleId, 
+					"rightCodes":checkNodeArr
+				},
+				traditional: true,
+				dataType:"json",
+				success:function(data){
+					if(data.code == 1){
+						alert("修改成功");
+						selectInfo(roleId);
+					}else if(data.code == 2){
+						alert("修改成功");
+						window.parent.lefthtml.location.reload();
+					}else{
+						alert(data.info);
+					}
+				}
+			})
+		}
+		
+			
+	</script>
+
+
+</body>
+</html>
